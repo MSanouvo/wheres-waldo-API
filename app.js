@@ -1,7 +1,7 @@
 const express = require("express")
 const path = require("node:path")
 //Name can change if needed
-const index = require("./routes/index")
+const index = require("./routes/router")
 
 const app = express()
 const PORT = process.eventNames.PORT || 3000
