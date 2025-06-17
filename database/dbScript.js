@@ -13,7 +13,7 @@ const supabase = createClient(
 
 async function addTestScore() {
     const score = await prisma.leaderboard.create({
-        data:{
+        data: {
             name: 'Winner',
             completion_time: 2.1,
         }
@@ -23,7 +23,7 @@ async function addTestScore() {
 async function addTestMap() {
     const { data } = supabase.storage.from('maps/test').getPublicUrl('wimmelbilder.png')
     const map = await prisma.map.create({
-        data:{
+        data: {
             name: 'test_map',
             url: data.publicUrl
         }
@@ -31,46 +31,40 @@ async function addTestMap() {
 }
 
 async function addTestTarget() {
-    const target1 = await prisma.targets.create({
-        data:{
+    const target1 = await prisma.targets.update({
+        where: {
             name: 'Dummy1',
-            map: {
-                connect: {
-                    id: 3
-                }
-            },
-            x_min: 10,
-            x_max: 20,
-            y_min: 5,
-            y_max: 15
-        }
-    })
-    const target2 = await prisma.targets.create({
-        data:{
-            name: 'Dummy2',
-            map: {
-                connect: {
-                    id: 3
-                }
-            },
-            x_min: 50,
-            x_max: 60,
-            y_min: 100,
-            y_max: 110
-        }
-    })
-    const target3 = await prisma.targets.create({
-        data:{
-            name: 'Dummy3',
-            map: {
-                connect: {
-                    id: 3
-                }
-            },
+            id: 2
+        },
+        data: {
             x_min: 100,
-            x_max: 110,
-            y_min: 50,
-            y_max: 60
+            x_max: 200,
+            y_min: 500,
+            y_max: 600
+        }
+    })
+    const target2 = await prisma.targets.update({
+        where: {
+            name: 'Dummy2',
+            id: 3
+        },
+        data: {
+            x_min: 500,
+            x_max: 600,
+            y_min: 200,
+            y_max: 300
+        }
+    })
+    const target3 = await prisma.targets.update({
+        where: {
+            name: 'Dummy3',
+            id: 4
+        },
+        data: {
+            x_min: 700,
+            x_max: 800,
+            y_min: 500,
+            y_max: 600
         }
     })
 }

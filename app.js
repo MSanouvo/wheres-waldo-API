@@ -2,17 +2,21 @@ const express = require("express")
 const path = require("node:path")
 //Name can change if needed
 const index = require("./routes/router")
+const cors = require('cors')
 
 const app = express()
 const PORT = process.eventNames.PORT || 3000
 
 app.use(express.urlencoded({ exntended: true }))
-app.set("views", path.join(__dirname, "views"))
-app.set("view engine", "ejs")
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}))
+app.use(express.json())
+// app.use(cors())
 
-//For CSS
-const assetsPath = path.join(__dirname, "styles")
-app.use(express.static(assetsPath))
 
 app.use("/", index)
 

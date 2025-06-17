@@ -17,7 +17,7 @@ const index = Router()
 let START_TIME = 0
 let END_TIME = 0
 let TOTAL_TIME = 0 
-const TARGETS = []
+let TARGETS = []
 
 function secondsToTime(time){
     const hour = Math.floor(time / 3600).toString().padStart(2,'0')
@@ -41,14 +41,24 @@ function endTime(){
     console.log(TOTAL_TIME)
 }
 
-// USE THIS WHEN DISPLAYING TIME
-// const time = secondsToTime(totalTime)
-//     console.log('Time to Complete')
-//     console.log(time)
+async function setTargets(id) {
+    TARGETS = []
+    const targets = await prisma.targets.findMany({
+        where:{
+            mapId: id
+        }
+    })
+    console.log(targets)
+    targets.map(target => {
+        TARGETS.push(target.name)
+    })
+    console.log(TARGETS)
+}
 
 index.get('/game/start', async (req, res) => {
     // const { data } = supabase.storage.from('maps/test').getPublicUrl('wimmelbilder.png')
     // console.log(data.publicUrl)
+
     startTime()
     //Change this to finding map by name during production
     const map = await prisma.map.findUnique({
@@ -57,18 +67,9 @@ index.get('/game/start', async (req, res) => {
         }
     })
     console.log(map)
-    //Maybe join these queries into 1 later
-    const targets = await prisma.targets.findMany({
-        where:{
-            mapId: 3
-        }
-    })
-    console.log(targets)
-    targets.map(target => {
-        TARGETS.push(target.name)
-    })
-    console.log(TARGETS)
-    res.json({ image: map.url})
+    await setTargets(3)
+    //NEED IMAGE URL FOR TARGETS
+    res.json({ image: map.url, targets: TARGETS})
 })
 
 // Will need another id to truly get unique score, or search by latest if multiple results ?
@@ -81,7 +82,7 @@ index.get('/game/score', async (req, res) => {
         }
     })
     console.log(score)
-    res.json({ name: score[0].name, time: score[0].completion_time })
+    res.json({ id: score[0].id, name: score[0].name, time: score[0].completion_time })
 })
 
 index.get('/game/game-over', (req, res) => {
@@ -101,9 +102,6 @@ index.post('/game/game-over', async (req, res) => {
     res.status(200).json({ ok: true })
 })
 
-
-//Need logic to reduce target count when correct guess is made
-//Need check to make sure repeated targets aren't being counted
 index.post('/game/target', async (req, res) => {
     const xCoord = req.body.x
     const yCoord = req.body.y
@@ -145,6 +143,16 @@ index.post('/game/target', async (req, res) => {
         }
     }
     else res.status(200).json({ hit: false })
+})
+
+index.get('/game/leaderboard', async (req, res) => {
+    const leaderboard = await prisma.leaderboard.findMany({
+        orderBy:{
+            completion_time: 'asc'
+        }
+    })
+    console.log(leaderboard)
+    res.json({ leaderboard: leaderboard })
 })
 
 module.exports = index
