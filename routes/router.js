@@ -1,15 +1,10 @@
 const { Router } = require("express")
-const { createClient } = require("@supabase/supabase-js");
 
 const { PrismaClient } = require("@prisma/client");
 
 require("dotenv").config()
 
 const prisma = new PrismaClient()
-const supabase = createClient(
-	process.env.SUPABASE_URL,
-	process.env.SERVICE_KEY
-);
 
 const index = Router()
 
@@ -18,14 +13,15 @@ let START_TIME = 0
 let END_TIME = 0
 let TOTAL_TIME = 0 
 let TARGETS = []
+let ICONS = []
 
-function secondsToTime(time){
-    const hour = Math.floor(time / 3600).toString().padStart(2,'0')
-    const min = Math.floor(time % 3600 / 60).toString().padStart(2,'0')
-    const sec = Math.floor(time % 60).toString().padStart(2,'0')
+// function secondsToTime(time){
+//     const hour = Math.floor(time / 3600).toString().padStart(2,'0')
+//     const min = Math.floor(time % 3600 / 60).toString().padStart(2,'0')
+//     const sec = Math.floor(time % 60).toString().padStart(2,'0')
     
-    return hour + ':' + min + ':' + sec;
-}
+//     return hour + ':' + min + ':' + sec;
+// }
 
 function startTime(){
     START_TIME = new Date()
@@ -43,33 +39,36 @@ function endTime(){
 
 async function setTargets(id) {
     TARGETS = []
+    ICONS = []
     const targets = await prisma.targets.findMany({
         where:{
             mapId: id
+        },
+        include: {
+            Icons: true
         }
     })
-    console.log(targets)
+    // console.log(targets)
     targets.map(target => {
-        TARGETS.push(target.name)
+        TARGETS.push(target)
     })
-    console.log(TARGETS)
+
 }
 
+//Need to fix this to work for multiple maps
 index.get('/game/start', async (req, res) => {
-    // const { data } = supabase.storage.from('maps/test').getPublicUrl('wimmelbilder.png')
-    // console.log(data.publicUrl)
 
     startTime()
     //Change this to finding map by name during production
-    const map = await prisma.map.findUnique({
+    const map = await prisma.map.findMany({
         where:{
-            id: 3
+            id: 4
         }
     })
-    console.log(map)
-    await setTargets(3)
-    //NEED IMAGE URL FOR TARGETS
-    res.json({ image: map.url, targets: TARGETS})
+    // console.log(map)
+    await setTargets(4)
+
+    res.json({ image: map[0].url, targets: TARGETS, icons: ICONS })
 })
 
 // Will need another id to truly get unique score, or search by latest if multiple results ?
@@ -129,10 +128,10 @@ index.post('/game/target', async (req, res) => {
     if(checkTarget.length != 0) {
         let hit = false
         for(let i = 0; i< TARGETS.length; i++) {
-            console.log(TARGETS[i])
-            if(TARGETS[i] === checkTarget[0].name){
+            // console.log(TARGETS[i])
+            if(TARGETS[i].name === checkTarget[0].name){
+                console.log('hit')
                 TARGETS.splice(i, 1)
-                console.log(TARGETS)
                 hit = true
                 if(TARGETS.length === 0) res.redirect('/game/game-over')
                 else res.status(200).json({ hit: hit })
