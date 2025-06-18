@@ -1,15 +1,9 @@
 const { Client } = require("pg")
 const { PrismaClient } = require("@prisma/client");
-const { createClient } = require("@supabase/supabase-js");
 
 const prisma = new PrismaClient()
 require("dotenv").config()
 
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SERVICE_KEY
-);
 
 // async function addTestScore() {
 //     const score = await prisma.leaderboard.create({
@@ -21,7 +15,6 @@ const supabase = createClient(
 // }
 
 async function addTestMap() {
-    // const { data } = supabase.storage.from('maps/test').getPublicUrl('wimmelbilder.png')
     const map = await prisma.map.create({
         data: {
             name: 'Map 1',
@@ -122,9 +115,9 @@ async function addTestIcons(){
 }
 
 async function main() {
-    addTestMap()
-    addTestTarget()
-    addTestIcons()
+    // addTestMap()
+    // addTestTarget()
+    // addTestIcons()
     console.log('done')
 }
 

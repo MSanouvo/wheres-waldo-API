@@ -7,6 +7,8 @@ const app = express()
 app.use(express.urlencoded({ extended: false }))
 app.use("/", index)
 
+//Outdated Tests
+
 test('Game sends image when started', done => {
     const url = "https://slqnrxbkxzpvpuzkidpd.supabase.co/storage/v1/object/public/maps/test/wimmelbilder.png"
     request(app)
